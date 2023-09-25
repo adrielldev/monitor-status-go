@@ -107,10 +107,10 @@ func leSitesArquivo() []string {
 	for {
 		linha, err := leitor.ReadString(byte('\n'))
 		linha = strings.TrimSpace(linha)
-		sites = append(sites, linha)
-		if err == io.EOF {
+		if err == io.EOF || linha == "" {
 			break
 		}
+		sites = append(sites, linha)
 
 	}
 
@@ -151,17 +151,34 @@ func adicionaOuLeConfiguracoes() string {
 	}
 	leitor := bufio.NewReader(arquivo)
 	username, _ := leitor.ReadString('\n')
-	fmt.Println(username)
 	if username == "" {
 		fmt.Println("Você ainda não possui configurações de usuário, digite o nome desejado:")
 		var nome string
 		fmt.Scan(&nome)
 		arquivo.WriteString(nome)
+		fmt.Println("Agora para começar a usar a aplicação digite os sites que deseja monitorar:")
+		configuraSites()
 	}
+	arquivo.Close()
 
 	return username
 }
 
 func configuraSites() {
+	arquivo, err := os.OpenFile("sites.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Ocorreu um erro", err)
+	}
+	fmt.Println("No momento você possui os seguintes sites:")
+	leSitesArquivo()
+	var input string
+	fmt.Println("Para encerrar a configuração dos sites digite 0 e dê enter")
+	for input != "0" {
+		fmt.Scan(&input)
+		if input != "0" && input != "" {
+			arquivo.WriteString(input + "\n")
+		}
 
+	}
+	arquivo.Close()
 }
